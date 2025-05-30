@@ -85,7 +85,7 @@ const AuthForm = ({ onLogin, selectedDB = "mysql" }) => {
             </div>
             <div className="mb-3">
               <label className="form-label">
-                {mode === "login" ? "Contraseña" : "Nombre (como contraseña)"}
+                {mode === "login" ? "Contraseña" : "Contraseña"}
               </label>
               <div className="input-group">
                 <input

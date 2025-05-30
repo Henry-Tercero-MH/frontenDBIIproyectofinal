@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import BookForm from "./BookForm";
 import BookList from "./BookList";
 import AuthorForm from "./AuthorForm";
@@ -12,10 +13,40 @@ import LoanList from "./LoanList";
 
 const TabbedDashboard = ({ selectedDB }) => {
   const [refresh, setRefresh] = useState(false);
+  const API = import.meta.env.VITE_API_URL;
+
   const handleRefresh = () => setRefresh(!refresh);
+
+  const handleBackup = async () => {
+    try {
+      await axios.post(`${API}/backup/${selectedDB}`);
+      alert("✅ Backup exitoso");
+    } catch (err) {
+      alert("❌ Error al hacer backup: " + err.message);
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      await axios.post(`${API}/restore/${selectedDB}`);
+      alert("✅ Restauración exitosa");
+    } catch (err) {
+      alert("❌ Error al restaurar: " + err.message);
+    }
+  };
 
   return (
     <div className="container mt-4">
+      {/* 🔁 Botones de Backup/Restore */}
+      <div className="d-flex justify-content-end gap-2 mb-3">
+        <button className="btn btn-success" onClick={handleBackup}>
+          📤 Backup
+        </button>
+        <button className="btn btn-warning" onClick={handleRestore}>
+          🔄 Restaurar
+        </button>
+      </div>
+
       <ul className="nav nav-tabs" id="dashboardTabs" role="tablist">
         <li className="nav-item" role="presentation">
           <button
