@@ -1,14 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const BookForm = ({ selectedDB, onCreated }) => {
   const API = import.meta.env.VITE_API_URL;
+
   const [formData, setFormData] = useState({
     title: "",
     author_id: "",
     category_id: "",
     available: true,
   });
+
+  const [authors, setAuthors] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  // Cargar autores y categorías al montar
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [authorRes, categoryRes] = await Promise.all([
+          axios.get(`${API}/${selectedDB}/authors/read`),
+          axios.get(`${API}/${selectedDB}/categories/read`),
+        ]);
+        setAuthors(authorRes.data);
+        setCategories(categoryRes.data);
+      } catch (err) {
+        console.error("Error al cargar autores o categorías:", err.message);
+      }
+    };
+
+    if (selectedDB) {
+      fetchData();
+    }
+  }, [selectedDB]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -19,7 +43,7 @@ const BookForm = ({ selectedDB, onCreated }) => {
     e.preventDefault();
     try {
       await axios.post(`${API}/${selectedDB}/books/create`, formData);
-      alert("Libro registrado correctamente");
+      alert(`Libro registrado correctamente en ${selectedDB}`);
       onCreated();
       setFormData({
         title: "",
@@ -47,28 +71,37 @@ const BookForm = ({ selectedDB, onCreated }) => {
             required
           />
         </div>
+
         <div className="col-md-3">
-          <input
-            type="number"
+          <select
             name="author_id"
-            className="form-control"
-            placeholder="ID Autor"
+            className="form-select"
             value={formData.author_id}
             onChange={handleChange}
             required
-          />
+          >
+            <option value="">Seleccione Autor</option>
+            {authors.map((a) => (
+              <option value={a.id || a._id}>{a.name}</option>
+            ))}
+          </select>
         </div>
+
         <div className="col-md-3">
-          <input
-            type="number"
+          <select
             name="category_id"
-            className="form-control"
-            placeholder="ID Categoría"
+            className="form-select"
             value={formData.category_id}
             onChange={handleChange}
             required
-          />
+          >
+            <option value="">Seleccione Categoría</option>
+            {categories.map((c) => (
+              <option value={c.id || c._id}>{c.name}</option>
+            ))}
+          </select>
         </div>
+
         <div className="col-md-3">
           <div className="form-check">
             <input
@@ -84,6 +117,7 @@ const BookForm = ({ selectedDB, onCreated }) => {
             </label>
           </div>
         </div>
+
         <div className="col-12">
           <button type="submit" className="btn btn-primary w-100">
             Guardar

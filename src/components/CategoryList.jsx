@@ -8,21 +8,29 @@ const CategoryList = ({ selectedDB, refresh }) => {
   useEffect(() => {
     axios
       .get(`${API}/${selectedDB}/categories/read`)
-      .then((res) => setCategories(res.data))
+      .then((res) => {
+        console.log("📦 Categorías recibidas:", res.data);
+        setCategories(res.data);
+      })
       .catch((err) => console.error("Error al obtener categorías:", err));
-      console.log("API URL:", `${API}/${selectedDB}/categories/read`);
-
   }, [selectedDB, refresh]);
 
   return (
     <div className="container mt-4">
       <h4>Listado de Categorías</h4>
       <ul className="list-group">
-        {categories.map((cat, index) => (
-          <li key={cat.id || index} className="list-group-item">
-            {cat.name}
-          </li>
-        ))}
+        {categories.map((cat, index) => {
+          const isArray = Array.isArray(cat);
+          const name = isArray ? cat[1] : cat.name;
+          const key = isArray ? cat[0] : cat.id || cat._id || index;
+
+          return (
+            <li key={key} className="list-group-item">
+              {name}
+            </li>
+          );
+        })}
+
         {categories.length === 0 && (
           <li className="list-group-item text-muted">
             No hay categorías registradas.
